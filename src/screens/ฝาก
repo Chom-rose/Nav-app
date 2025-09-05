@@ -1,0 +1,156 @@
+import React, { useContext, useState } from "react";
+import { View, Text, Image, TouchableOpacity, TextInput, FlatList, StyleSheet } from "react-native";
+import { CartContext } from "./CartContext";
+import DarkModeSwitch from "../../DarkModeSwitch";
+
+const Home = ({ navigation ,isDarkMode, setIsDarkMode}) => {
+  const { products, addProduct, addToCart, togglePurchased } = useContext(CartContext);
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [image, setImage] = useState("");
+
+  const handleAddProduct = () => {
+    if (!name || !price) return alert("กรุณากรอกชื่อและราคาสินค้า");
+    addProduct(name, parseFloat(price), image);
+    setName("");
+    setPrice("");
+    setImage("");
+  };
+
+  return (
+    <View style={[styles.container, isDarkMode && styles.darkBackground]}>
+      <Text style={[styles.header, isDarkMode && styles.darkText]}>WELCOME TO MY STORE</Text>
+      <DarkModeSwitch isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+    
+
+      {/* กรอกสินค้าใหม่ */}
+      <TextInput style={styles.input} placeholder="ชื่อสินค้า" value={name} onChangeText={setName} />
+      <TextInput style={styles.input} placeholder="ราคาสินค้า" value={price} keyboardType="numeric" onChangeText={setPrice} />
+      <TextInput style={styles.input} placeholder="URL รูปสินค้า (ถ้ามี)" value={image} onChangeText={setImage} />
+      <TouchableOpacity style={styles.addButton} onPress={handleAddProduct}>
+        <Text style={styles.buttonText2}>เพิ่มสินค้า</Text>
+      </TouchableOpacity>
+
+      {/* รายการสินค้า */}
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.product}>
+            <Image source={{ uri: item.image }} style={styles.image} />
+            <Text style={styles.productName}>{item.name}</Text>
+            <Text style={styles.price}>฿{item.price}</Text>
+
+            {/* ปุ่มเปลี่ยนสถานะสินค้า */}
+            <TouchableOpacity
+              style={[
+                styles.statusButton,
+                { backgroundColor: item.status === "purchased" ? "#4CAF50" : "#d7c500" }
+              ]}
+              onPress={() => togglePurchased(item.id)}
+            >
+              <Text style={styles.buttonText}>
+                {item.status === "purchased" ? "✔ ซื้อแล้ว" : "🛒 ยังไม่ได้ซื้อ"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* ปุ่มเพิ่มสินค้าลงตะกร้า */}
+            <TouchableOpacity style={styles.addToCartButton} onPress={() => addToCart(item)}>
+              <Text style={styles.buttonText}>เพิ่มลงตะกร้า</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      />
+
+      {/* ไปหน้าตะกร้า */}
+      <TouchableOpacity style={styles.cartButton} onPress={() => navigation.navigate("Store")}>
+        <Text style={styles.buttonText}>ตะกร้าสินค้า</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: { 
+    flex: 1, 
+    padding: 20, 
+    backgroundColor: "#F7F7F7" 
+  },
+  header: { 
+    fontSize: 18, 
+    fontWeight: "bold", 
+    textAlign: "center", 
+    marginBottom: 10 
+  },
+  input: { 
+    borderWidth: 1, 
+    padding: 8, 
+    marginVertical: 3, 
+    borderRadius: 10, 
+  },
+  addButton: { 
+    backgroundColor: "#d7c500", 
+    padding: 7, 
+    borderRadius: 5, 
+    alignItems: "center", 
+    marginBottom: 10,
+  },
+  product: { 
+    backgroundColor: "#FFF", 
+    padding: 10, 
+    marginBottom: 10, 
+    borderRadius: 10, 
+    alignItems: "center" 
+  },
+  productName: { 
+    fontSize: 18, 
+    fontWeight: "bold" 
+  },
+  image: { 
+    width: 100, 
+    height: 100, 
+    marginBottom: 5 
+  },
+  price: { 
+    fontSize: 16, 
+    fontWeight: "bold", 
+    color: "green" 
+  },
+  statusButton: {
+    padding: 5,
+    borderRadius: 5,
+    marginTop: 5,
+    alignItems: "center"
+  },
+  addToCartButton: { 
+    backgroundColor: "#d7c500", 
+    padding: 5, 
+    borderRadius: 5, 
+    marginTop: 5 
+  },
+  cartButton: { 
+    backgroundColor: "black", 
+    padding: 10, 
+    borderRadius: 5, 
+    alignItems: "center", 
+    marginTop: 10 
+  },
+  buttonText: { 
+    color: "#ffffff", 
+    fontSize: 16,
+    fontWeight: 'light'
+  },
+  buttonText2: {
+    color: "black", 
+    fontSize: 16,
+    fontWeight: 'light'
+  },
+  darkBackground: { 
+    backgroundColor: "#333" 
+  },
+  darkText: { 
+    color: "#fff" 
+  },
+});
+
+export default Home;
